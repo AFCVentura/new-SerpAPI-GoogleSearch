@@ -2,36 +2,32 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
+import axios from "axios";
 
 const API_KEY =
   "42c0f39f69db5edbd4057951755bc3e03febf149d3329f89ffd859db5e4bb372";
 
 function App() {
-  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [results, setResults] = useState([]);
 
-  const handleSearch = async (e) => {
+  const handleQuery = async (e) => {
     e.preventDefault();
 
-    if (!search) return;
+    if (!query) return;
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("https://serpapi.com/search.json", {
+      const res = await axios.get(`http://localhost:4000/search`, {
         params: {
-          q: search,
-          engine: "google",
-          google_domain: "google.com.br",
-          api_key: API_KEY,
-          hl: "pt-br",
-          gl: "br",
-          num: 10,
+          query,
         },
       });
-      const data = res.json();
-      setResults(data);
+
+      console.log(`Resultados da requisição: ${res.data}`);
+      setResults(res.data.organic_results || []);
     } catch (err) {
       console.error(err.message);
       setError("Não foi possível fazer a busca");
@@ -44,16 +40,16 @@ function App() {
     <>
       <div className="App">
         <h1>Noodle</h1>
-        <form onSubmit={handleSearch}>
+        <form onSubmit={handleQuery}>
           <label>
             Search
             <input
               type="text"
-              name="search"
+              name="query"
               onChange={(e) => {
-                setSearch(e.target.value);
+                setQuery(e.target.value);
               }}
-              value={search}
+              value={query}
             />
           </label>
           <button type="submit">Buscar</button>
@@ -65,12 +61,18 @@ function App() {
         ) : (
           <ul>
             {results.map((result, index) => {
-              <li key={index}>
-                <a href={result.link} target="_blank" rel="noopener noreferrer">
-                  {result.title}
-                </a>
-                <p>{result.snippet}</p>
-              </li>;
+              return (
+                <li key={index}>
+                  <a
+                    href={result.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {result.title}
+                  </a>
+                  <p>{result.snippet}</p>
+                </li>
+              );
             })}
           </ul>
         )}
@@ -80,4 +82,4 @@ function App() {
 }
 
 export default App;
-''
+("");
